@@ -7,7 +7,11 @@
 <div class="row">
     <div class="col-md-8">
         <h3>{% trans "Profile" %}</h3>
-
+        {% if not request.user.is_valid %}
+            <div class="alert alert-warning" role="alert">
+               {% trans "Your account is not verify. Please, check your email." %}
+            </div>
+        {% endif %} 
         <table class="table table-bordered">
             <tr>
                 <td>{% trans "Name" %}</td>
@@ -18,10 +22,15 @@
                 <td><a href="mailto:{{ request.user.email }}">{{ request.user.email }}</a></td>
             </tr>
         </table>
+    <div class="row">
+    <div class="col-6 mt-4 float-left">
+        <a href="{% url 'edit_personal_information' %}" class="btn btn-secondary">{% trans "Edit profile" %}</a>
+    </div>
+    <div class="col-6 mt-4">
+        <a href="{% url 'password_change' %}" class="btn btn-info float-right">{% trans "Change password" %}</a>
+    </div>
+</div>
     </div>
 </div>
 
-<div class="mt-4">
-    <a href="{% url 'edit_personal_information' %}" class="btn btn-secondary">{% trans "Edit profile" %}</a>
-</div>
 {% endblock %}

@@ -92,6 +92,13 @@ class EditUserForm(forms.ModelForm):
             'email',
         )
 
+    def __init__(self, *args, **kwargs):
+        super(EditUserForm, self).__init__(*args, **kwargs)
+        self.is_email_changed = False
+
+    def set_is_email_changed(self, value: bool) -> None:
+        self.is_email_changed = value
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if self.instance.email == email:
@@ -100,7 +107,13 @@ class EditUserForm(forms.ModelForm):
             uu = User.objects.filter(email=email).exclude(pk=self.instance.pk).exists()
             if uu:
                 raise forms.ValidationError(_('This email address is already using by another user.'))
+            self.set_is_email_changed(True)
         return email
+
+    def save(self, *args, **kwargs):
+        instance: User = super(EditUserForm, self).save(*args, **kwargs)
+        if self.is_email_changed:
+            instance.deactivate()
 
 
 class UserRegistrationForm(UserCreationForm):
