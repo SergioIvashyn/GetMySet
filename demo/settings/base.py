@@ -3,7 +3,6 @@ import dj_database_url
 from django.utils.crypto import get_random_string
 from decouple import config, Csv
 
-
 BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -11,12 +10,10 @@ PROJECT_NAME = config('PROJECT_NAME')
 
 SECRET_KEY = config("SECRET_KEY")
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -30,6 +27,8 @@ INSTALLED_APPS = [
 
     'django_extensions',
 
+    'social_django',
+
     # 'mptt',
     # 'easy_thumbnails',
     # 'django_select2',
@@ -39,7 +38,6 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.accounts',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -51,7 +49,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 
 ROOT_URLCONF = '%s.urls' % PROJECT_NAME
 
@@ -83,7 +80,6 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 WSGI_APPLICATION = '%s.wsgi.application' % PROJECT_NAME
 
-
 # Database
 DATABASES = {
     'default': dj_database_url.config(default=config('DATABASE_URL')),
@@ -105,7 +101,6 @@ AUTH_PASSWORD_VALIDATORS = [
     # },
 ]
 
-
 # Internationalization
 LANGUAGE_CODE = config('LANGUAGE_CODE', default='en')
 
@@ -121,7 +116,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
@@ -135,9 +129,9 @@ STATICFILES_DIRS = (
 MEDIA_ROOT = config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = '/media/'
 
-
 AUTH_USER_MODEL = 'accounts.User'
 AUTHENTICATION_BACKENDS = (
+    'social_core.backends.linkedin.LinkedinOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -184,3 +178,16 @@ GOOGLE_TAG_MANAGER = os.environ.get('GOOGLE_TAG_MANAGER', '')
 # ELASTICSEARCH_INDICES_PREFIX = config('ELASTICSEARCH_INDICES_PREFIX', default=PROJECT_NAME)
 
 SITE_URL = config('SITE_URL', default='')
+
+NO_DEFAULT_PROTECTED_USER_FIELDS = False
+USER_FIELDS = ['name', 'email']
+SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = config('SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY', default='')
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = config('SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET', default='')
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SCOPE = ['r_liteprofile', 'r_emailaddress']
+SOCIAL_AUTH_LINKEDIN_OAUTH2_FIELD_SELECTORS = ['emailAddress']
+SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [
+    ('id', 'id'),
+    ('emailAddress', 'email'),
+]
+USER_FIELD_MAPPING = {'email': 'email', 'username': 'name', 'first_name': 'name', 'last_name': 'name',
+                      'fullname': 'name'}
