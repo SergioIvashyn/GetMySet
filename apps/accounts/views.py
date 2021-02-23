@@ -47,7 +47,6 @@ def login_view(request, template_name='accounts/login.html'):
 
     redirect_to = request.POST.get('next', request.GET.get('next', ''))
     do_redirect = False
-
     if request.user.is_authenticated:
         if redirect_to == request.path:
             raise ValueError('Redirection loop for authenticated user detected.')
@@ -63,7 +62,7 @@ def login_view(request, template_name='accounts/login.html'):
     context = {
         'form': form,
     }
-    return render(request, 'accounts/login.html', context)
+    return render(request, template_name, context)
 
 
 def register(request, template_name='accounts/register.html'):
@@ -83,10 +82,15 @@ def register(request, template_name='accounts/register.html'):
     context = {
         'form': form,
     }
-    return render(request, 'accounts/register.html', context)
+    return render(request, template_name, context)
 
 
 def logout_view(request):
     _next = request.GET.get('next')
     logout(request)
     return redirect(_next if _next else settings.LOGOUT_REDIRECT_URL)
+
+
+def activate_user_by_email_view(request, email: str):
+    User.objects.activate_user_by_email(email)
+    return redirect('index')

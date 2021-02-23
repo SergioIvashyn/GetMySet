@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -14,11 +16,14 @@ import pytz
 import random
 import string
 
+from apps.accounts.services.email_sender import UserEmailSender
+
 
 class UserManager(BaseUserManager):
     """
     Creates and saves a User with the given email, phone, password and optional extra info.
     """
+
     def _create_user(self, email,
                      name,
                      password,
@@ -45,6 +50,8 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email, name, password=None, **extra_fields):
+        print(name)
+        print(email)
         return self._create_user(email, name, password, False, False, **extra_fields)
 
     def create_superuser(
@@ -57,6 +64,13 @@ class UserManager(BaseUserManager):
 
     def get_by_natural_key(self, email):
         return self.get(email__iexact=email)
+
+    def activate_user_by_email(self, email: str) -> bool:
+        user: Optional[None, User] = self.model.objects.filter(email=email).first()
+        if user:
+            user.is_valid = True
+            user.save()
+        return bool(user)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -75,6 +89,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False,
         help_text=_('Designates whether the user can log into this admin site.'),
     )
+
+    is_valid = models.BooleanField(
+        _('valid status'),
+        default=False,
+        help_text=_('Designates whether the user validate into email.'),
+    )
+
     is_active = models.BooleanField(
         _('active'),
         default=True,
@@ -128,6 +149,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def has_usable_password(self) -> bool:
         return super().has_usable_password()
+
     has_usable_password.boolean = True
 
     @property
@@ -135,3 +157,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         from django.utils.timezone import now
         delta = now() - self.date_joined
         return delta.days
+
+    def deactivate(self) -> 'User':
+        self.is_valid = False
+        self.save(update_fields=['is_valid'])
+        UserEmailSender(self.email).send_activation_message()
+        return self
