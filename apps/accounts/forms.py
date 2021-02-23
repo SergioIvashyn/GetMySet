@@ -23,7 +23,7 @@ class UserChangeForm(BaseUserChangeForm):
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = forms.ALL_FIELDS
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,7 +55,7 @@ class UserCreationForm(BaseUserCreationForm):
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = forms.ALL_FIELDS
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
