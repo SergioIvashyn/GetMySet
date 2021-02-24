@@ -202,5 +202,7 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [
     ('id', 'id'),
     ('emailAddress', 'email'),
 ]
-USER_FIELD_MAPPING = {'email': 'email', 'username': 'name', 'first_name': 'name', 'last_name': 'name',
-                      'fullname': 'name'}
+
+PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'username']
+
+USER_FIELD_MAPPING = {'email': 'email', 'fullname': 'name'}
