@@ -15,7 +15,7 @@
       <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Register" %}</button>
     </div>
 </form>
-    <button class="btn btn-info mb-2">
-        <a href="{% url 'social:begin' 'linkedin-oauth2' %}">{% trans "Login with LinkedIn" %}</a>
-    </button>
+    <a rel="nofollow" class="link">
+       <a href="{% url 'social:begin' 'linkedin-oauth2' %}">{% trans "Login with LinkedIn" %}</a>
+    </a>
 {% endblock %}

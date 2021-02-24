@@ -2,20 +2,12 @@ from typing import Optional
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 from django.utils import timezone
-from django.db.models.signals import pre_save, post_delete
-from django.contrib.postgres.fields import JSONField, ArrayField
-from django.dispatch import receiver
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
-import pytz
-import random
-import string
-
 from apps.accounts.services.email_sender import UserEmailSender
 
 
@@ -50,8 +42,6 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email, name, password=None, **extra_fields):
-        print(name)
-        print(email)
         return self._create_user(email, name, password, False, False, **extra_fields)
 
     def create_superuser(

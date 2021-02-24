@@ -13,6 +13,7 @@ from datetime import timedelta
 from django.db.models import Q
 from .models import User
 from .forms import EditUserForm
+from .services.email_sender import UserEmailSender
 
 
 @login_required
@@ -74,6 +75,7 @@ def register(request, template_name='accounts/register.html'):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            UserEmailSender(user.email).send_activation_message()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
     else:
@@ -92,5 +94,5 @@ def logout_view(request):
 
 
 def activate_user_by_email_view(request, email: str):
-    User.objects.activate_user_by_email(email)
-    return redirect('index')
+    success: bool = User.objects.activate_user_by_email(email)
+    return redirect(reverse('index') + f'?success={success}')

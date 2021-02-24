@@ -181,7 +181,16 @@ GOOGLE_TAG_MANAGER = os.environ.get('GOOGLE_TAG_MANAGER', '')
 # ELASTICSEARCH_URLS = config('ELASTICSEARCH_URLS', default='http://localhost:9200', cast=Csv())
 # ELASTICSEARCH_INDICES_PREFIX = config('ELASTICSEARCH_INDICES_PREFIX', default=PROJECT_NAME)
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', default=25, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default='NO') == 'YES'
+
 SITE_URL = config('SITE_URL', default='')
+
+# SOCIAL_AUTH
 
 NO_DEFAULT_PROTECTED_USER_FIELDS = False
 USER_FIELDS = ['name', 'email']
