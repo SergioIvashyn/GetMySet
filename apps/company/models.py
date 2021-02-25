@@ -13,7 +13,7 @@ class Company(models.Model):
     email = models.EmailField()
     slogan = models.TextField()
     description = models.TextField(blank=True)
-    logo = models.ImageField(storage='logos')
+    logo = models.ImageField(upload_to='logos')
     user_id = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
