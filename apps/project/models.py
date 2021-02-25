@@ -3,11 +3,13 @@ from django.db import models
 # Create your models here.
 from apps.industry.models import Industry
 from apps.technology.models import Technology
+from demo import settings
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     url = models.URLField()
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=30)
     is_private = models.BooleanField(default=False)
