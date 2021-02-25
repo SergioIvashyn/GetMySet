@@ -52,6 +52,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'social_django.middleware.SocialAuthExceptionMiddleware',
+
 ]
 
 ROOT_URLCONF = '%s.urls' % PROJECT_NAME
@@ -203,6 +206,6 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [
     ('emailAddress', 'email'),
 ]
 
-PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'username']
+PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'username', 'fullname']
 
-USER_FIELD_MAPPING = {'email': 'email', 'fullname': 'name'}
+# USER_FIELD_MAPPING = {'email': 'email', 'fullname': 'name'}
