@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django_extensions',
 
     'social_django',
+    'import_export',
 
     # 'mptt',
     # 'easy_thumbnails',
