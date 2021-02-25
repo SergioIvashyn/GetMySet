@@ -52,6 +52,7 @@ CACHES = {
 # SESSION_FILE_PATH = config('SESSION_FILE_PATH', default=os.path.join(BASE_DIR, 'sessions'))
 
 USE_HTTPS = config('USE_HTTPS', default='NO') == 'YES'
+RAISE_EXCEPTIONS = False
 
 if USE_HTTPS:
     SECURE_SSL_REDIRECT = True
