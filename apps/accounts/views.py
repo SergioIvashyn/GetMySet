@@ -95,4 +95,6 @@ def logout_view(request):
 
 def activate_user_by_email_view(request, email: str):
     success: bool = User.objects.activate_user_by_email(email)
-    return redirect(reverse('index') + f'?success={success}')
+    if success:
+        messages.success(request, 'Account is verify')
+    return redirect(reverse('index'))
