@@ -67,28 +67,28 @@
                 </div>
             {% endfor %}
         </div>
-    </div>
-{% if users.has_other_pages %}
-  <ul class="pagination">
-    {% if users.has_previous %}
-      <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% if qs.has_other_pages %}
+  <ul class="pagination pagination-lg">
+    {% if qs.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ qs.previous_page_number }}">&laquo;</a></li>
     {% else %}
-      <li class="disabled"><span>&laquo;</span></li>
+      <li class="disabled page-item"><span class="page-link">&laquo;</span></li>
     {% endif %}
-    {% for i in users.paginator.page_range %}
-      {% if users.number == i %}
-        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+    {% for i in qs.paginator.page_range %}
+      {% if qs.number == i %}
+        <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only">(current)</span></span></li>
       {% else %}
-        <li><a href="?page={{ i }}">{{ i }}</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
       {% endif %}
     {% endfor %}
-    {% if users.has_next %}
-      <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+    {% if qs.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ qs.next_page_number }}">&raquo;</a></li>
     {% else %}
-      <li class="disabled"><span>&raquo;</span></li>
+      <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
     {% endif %}
   </ul>
 {% endif %}
+    </div>
 </div>
 
 {% endblock %}
