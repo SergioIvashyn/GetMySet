@@ -1,9 +1,21 @@
 from django.db import models
 
 # Create your models here.
+from django.db.models import Manager
+
 from apps.industry.models import Industry
 from apps.technology.models import Technology
 from demo import settings
+
+
+class ProjectManager(Manager):
+    def public(self):
+        return self.get_queryset().filter(is_private=False).prefetch_related(
+            'technologies').prefetch_related('industries')
+
+    def private(self):
+        return self.get_queryset().filter(is_private=True).prefetch_related(
+            'technologies').prefetch_related('industries')
 
 
 class Project(models.Model):
@@ -15,6 +27,11 @@ class Project(models.Model):
     is_private = models.BooleanField(default=False)
     technologies = models.ManyToManyField(Technology, blank=True, related_name='technologies')
     industries = models.ManyToManyField(Industry, blank=True, related_name='industries')
+
+    objects = ProjectManager()
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return f'{self.pk}-{self.name}'
