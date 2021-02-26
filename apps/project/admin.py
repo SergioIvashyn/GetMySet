@@ -1,12 +1,10 @@
 from django.contrib import admin
-
-# Register your models here.
-from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST
-
 from apps.project.models import Project
 from apps.project.resource import ProjectResource
 from import_export.admin import ImportExportModelAdmin
+
+
+# Register your models here.
 
 
 class ProjectAdmin(ImportExportModelAdmin):
