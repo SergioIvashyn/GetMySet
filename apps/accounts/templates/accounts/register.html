@@ -5,17 +5,17 @@
 {% block extra_meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Register</h1>
+<h1 class="mb-4">{% trans "Sign Up" %}</h1>
 
 <form method="post">
     <input type="hidden" name="next" value="{{ next }}" />
     {% csrf_token %}
     {% include "forms/form_fields.html" with hide_required_badges=True %}
     <div class="form-group">
-      <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Register" %}</button>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Sign Up" %}</button>
     </div>
 </form>
-    <a rel="nofollow" class="link">
-       <a href="{% url 'social:begin' 'linkedin-oauth2' %}">{% trans "Login with LinkedIn" %}</a>
-    </a>
+    <div class="text-center">
+       <a class='btn border border-info rounded' href="{% url 'social:begin' 'linkedin-oauth2' %}">{% trans "Log In with LinkedIn" %}</a>
+    </div>
 {% endblock %}

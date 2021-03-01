@@ -603,3 +603,13 @@ class CaptureNode(template.Node):
             return ''
         else:
             return output
+
+
+@register.simple_tag(takes_context=True)
+def param_replace(context, **kwargs):
+    d = context['request'].GET.copy()
+    for attr, value in kwargs.items():
+        d[attr] = value
+    for attr in [attr for attr, value in d.items() if not value]:
+        del d[attr]
+    return d.urlencode()

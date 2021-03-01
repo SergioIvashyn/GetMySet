@@ -33,5 +33,9 @@ class Project(models.Model):
     class Meta:
         ordering = ['id']
 
+    @property
+    def is_url_working(self):
+        return not bool(self.notes)
+
     def __str__(self):
         return f'{self.pk}-{self.name}'

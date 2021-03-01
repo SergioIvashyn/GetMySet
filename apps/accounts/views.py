@@ -1,8 +1,9 @@
+from django.contrib.auth.forms import SetPasswordForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.utils.translation import ugettext as _
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
@@ -78,6 +79,7 @@ def register(request, template_name='accounts/register.html'):
             UserEmailSender(user.email).send_activation_message()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
+            return redirect(reverse('personal_information'))
     else:
         form = UserRegistrationForm()
 
@@ -96,5 +98,21 @@ def logout_view(request):
 def activate_user_by_email_view(request, email: str):
     success: bool = User.objects.activate_user_by_email(email)
     if success:
-        messages.success(request, 'Account is verify')
+        messages.success(request, _('Your email address has been verified!'))
     return redirect(reverse('index'))
+
+
+def password_set(request):
+    user = request.user
+    if request.method == 'POST':
+        form = SetPasswordForm(user=user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            return redirect(reverse('personal_information'))
+    else:
+        form = SetPasswordForm(user=user)
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/password_set.html', context)

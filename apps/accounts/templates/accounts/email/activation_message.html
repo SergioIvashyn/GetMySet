@@ -3,8 +3,7 @@
 
 {% block content %}
     {% load_option "SITE_URL" as site_url %}
-    <h1>{% trans "Activate account" %}</h1>
-    <p>{% trans "You're receiving this email because you change email for your user account or create new one." %}</p>
+    <h1>{% trans "Thanks for registering in our system" %}</h1>
     <p>{% trans "Please go to the following page for activating your account:" %}</p>
     <p><a href="{{ site_url }}{% url 'activate_user_by_email' email=email %}">
         {{ site_url }}{% url 'activate_user_by_email' email=email %}</a></p>

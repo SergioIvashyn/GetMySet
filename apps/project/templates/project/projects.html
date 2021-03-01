@@ -51,15 +51,19 @@
                     <div class="card p-3 m-3">
                         <div class="card-body">
                             <h5 class="card-title text-center">{{ obj.name }}</h5>
+
+                            <p class="card-text">Description: {{ obj.description }}</p>
+
                             <p class="card-text">Industries: {% for industry in obj.industries.all %}
                                 {{ industry.name }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}</p>
-                            <p class="card-text">Description: {{ obj.name }}</p>
                             <p>Technologies:
                                 {% for technology in obj.technologies.all %}
                                     {{ technology.name }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}</p>
-                            <p class="card-text">Url: <a href="{{ obj.url }}">{{ obj.url }}</a></p>
+                            <p class="card-text">
+                                {% if not obj.is_url_working %}<b class="text-danger">&times;</b>{% endif %}Url:
+                                <a href="{{ obj.url }}">{{ obj.url }}</a></p>
                             <button class="btn btn-primary">Edit</button>
                             <button class="btn btn-danger float-right">Delete</button>
                         </div>

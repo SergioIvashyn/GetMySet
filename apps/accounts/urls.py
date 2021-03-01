@@ -6,6 +6,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
+    path('password_set/', views.password_set, name='password_set'),
     path(
         'password-change/',
         auth_views.PasswordChangeView.as_view(
@@ -28,7 +29,7 @@ urlpatterns = [
             success_url=reverse_lazy('password_reset_complete'),
         ), name='password_reset_confirm'),
     path('password-reset/', auth_views.PasswordResetView.as_view(
-        email_template_name='accounts/email/password_reset.html',
+        html_email_template_name='accounts/email/password_reset.html',
         subject_template_name='accounts/email/password_reset_subject.txt',
         template_name='accounts/password_reset.html',
         success_url=reverse_lazy('password_reset_done'),

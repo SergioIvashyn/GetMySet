@@ -194,6 +194,19 @@ SITE_URL = config('SITE_URL', default='')
 
 # SOCIAL_AUTH
 
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'apps.accounts.services.custom_user_details.custom_user_details',
+)
+
 NO_DEFAULT_PROTECTED_USER_FIELDS = False
 USER_FIELDS = ['name', 'email']
 SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = config('SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY', default='')
