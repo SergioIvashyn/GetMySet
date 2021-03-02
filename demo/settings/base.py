@@ -221,3 +221,8 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [
 PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'username', 'fullname']
 
 USER_FIELD_MAPPING = {'email': 'email', 'fullname': 'name'}
+
+# elastic_search
+
+ELASTICSEARCH_URL = config('ELASTIC_SEARCH_URL')
+
