@@ -18,7 +18,7 @@ class ElasticSearchModelService:
     MAPPING = {}
 
     def __init__(self):
-        self.es: Elasticsearch = elasticsearch
+        self._es: Elasticsearch = elasticsearch
 
     @property
     def model_index(self):
@@ -28,9 +28,9 @@ class ElasticSearchModelService:
         return {"settings": self.SETTINGS, "mappings": self.MAPPING}
 
     def init_model_es_index(self) -> bool:
-        exist = self.es.indices.exists(self.model_index)
+        exist = self._es.indices.exists(self.model_index)
         if not exist:
-            self.es.indices.create(index=self.model_index, body=self.get_index_settings())
+            self._es.indices.create(index=self.model_index, body=self.get_index_settings())
         return not exist
 
     def get_model_body(self, obj: Model) -> dict:
@@ -38,13 +38,19 @@ class ElasticSearchModelService:
         raise NotImplementedError(_('Must implement get_model_body method'))
 
     def indexing_model(self, obj: Model) -> 'ElasticSearchModelService':
-        self.es.index(index=self.model_index, id=obj.pk, body=self.get_model_body(obj))
+        self._es.index(index=self.model_index, id=obj.pk, body=self.get_model_body(obj))
         return self
 
     def remove_model_from_index(self, obj: Model) -> 'ElasticSearchModelService':
-        self.es.delete(index=self.model_index, id=obj.pk)
+        self._es.delete(index=self.model_index, id=obj.pk)
         return self
 
-    def fill_index(self):
+    def fill_index(self) -> None:
         for model_obj in self.model.objects.all():
             self.indexing_model(model_obj)
+
+    def clear_index(self) -> None:
+        self._es.delete_by_query(index=self.model_index, body={"query": {"match_all": {}}})
+
+    def search(self, *args, **kwargs):
+        return self._es.search(index=self.model_index, *args, **kwargs)

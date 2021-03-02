@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from apps.project.elasticsearch import ProjectElasticSearchModelService
-from apps.project.models import Project
+from apps.core.models import Project
 
 
 @receiver(post_save, sender=Project)
