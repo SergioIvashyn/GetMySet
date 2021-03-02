@@ -1,5 +1,5 @@
 from apps.core.services.elasticsearch_api_base import ElasticSearchModelService
-from apps.project.models import Project
+from apps.core.models import Project
 
 
 class ProjectElasticSearchModelService(ElasticSearchModelService):
@@ -7,6 +7,9 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
 
     MAPPING = {
         "properties": {
+            "pk": {
+                "type": "integer"
+            },
             "name": {
                 "type": "text"
             },
