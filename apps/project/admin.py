@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.project.models import Project
+from apps.core.models import Project
 from apps.project.resource import ProjectResource
 from import_export.admin import ImportExportModelAdmin
 

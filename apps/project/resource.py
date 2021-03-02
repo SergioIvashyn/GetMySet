@@ -1,13 +1,9 @@
 from typing import Optional
 
-from import_export import resources, widgets, fields
-from import_export.instance_loaders import ModelInstanceLoader
-from import_export.widgets import Widget
+from import_export import resources, fields
 
+from apps.core.models import Technology, Project, Industry
 from apps.core.services.import_export_widget import FieldToPKManyToManyWidget
-from apps.industry.models import Industry
-from apps.project.models import Project
-from apps.technology.models import Technology
 
 
 class ProjectResource(resources.ModelResource):
