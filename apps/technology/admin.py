@@ -1,6 +1,11 @@
 from django.contrib import admin
+from apps.core.models.technology import Technology
+
 
 # Register your models here.
-from apps.technology.models import Technology
 
-admin.site.register(Technology)
+
+@admin.register(Technology)
+class TechnologyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name',)
+    ordering = ('id', 'name',)

@@ -1,11 +1,10 @@
+from django.conf import settings
 from django.db import models
-
-# Create your models here.
 from django.db.models import Manager
+from django.utils.translation import ugettext_lazy as _
 
-from apps.industry.models import Industry
-from apps.technology.models import Technology
-from demo import settings
+from apps.core.models.industry import Industry
+from apps.core.models.technology import Technology
 
 
 class ProjectManager(Manager):
@@ -21,17 +20,19 @@ class ProjectManager(Manager):
 class Project(models.Model):
     name = models.CharField(max_length=100)
     url = models.URLField()
-    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     description = models.TextField(blank=True)
-    notes = models.CharField(max_length=30)
+    notes = models.CharField(max_length=30, blank=True)
     is_private = models.BooleanField(default=False)
-    technologies = models.ManyToManyField(Technology, blank=True, related_name='technologies')
-    industries = models.ManyToManyField(Industry, blank=True, related_name='industries')
+    technologies = models.ManyToManyField('Technology', blank=True, related_name='projects')
+    industries = models.ManyToManyField('Industry', blank=True, related_name='projects')
 
     objects = ProjectManager()
 
     class Meta:
         ordering = ['id']
+        verbose_name = _('Project')
+        verbose_name_plural = _('Projects')
 
     @property
     def is_url_working(self):

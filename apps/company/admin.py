@@ -1,6 +1,10 @@
 from django.contrib import admin
 
 # Register your models here.
-from apps.company.models import Company
+from apps.core.models.company import Company
 
-admin.site.register(Company)
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'site_url']
+    ordering = ('name', )
