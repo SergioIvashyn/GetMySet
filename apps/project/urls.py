@@ -1,5 +1,5 @@
 from django.urls import path, re_path, reverse_lazy
-from . import views
+from . import views, signals
 
 urlpatterns = [
     path('projects/private/', views.private_projects, name='private_projects'),
