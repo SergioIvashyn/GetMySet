@@ -1,1 +1,1 @@
-from .current_year import *
+from .faker_model import *
