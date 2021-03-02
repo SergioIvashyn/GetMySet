@@ -1,6 +1,11 @@
 from django.contrib import admin
 
 # Register your models here.
-from apps.set.models import Set
+from apps.core.models import UserSet
 
-admin.site.register(Set)
+
+@admin.register(UserSet)
+class UserSetAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'set_user']
+    ordering = ('name', )
+

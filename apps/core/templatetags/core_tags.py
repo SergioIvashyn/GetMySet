@@ -4,6 +4,7 @@ from django.conf import settings
 
 register = template.Library()
 
+
 # Debugging
 
 @register.simple_tag
@@ -411,7 +412,7 @@ def distinct(queryset):
 def prepare_query_object(logic='AND', **kwargs):
     from django.db.models import Q
     query = None
-    for k,v in kwargs.items():
+    for k, v in kwargs.items():
         if query is None:
             query = Q(**{k: v})
         else:
@@ -603,3 +604,13 @@ class CaptureNode(template.Node):
             return ''
         else:
             return output
+
+
+@register.simple_tag(takes_context=True)
+def param_replace(context, **kwargs):
+    d = context['request'].GET.copy()
+    for attr, value in kwargs.items():
+        d[attr] = value
+    for attr in [attr for attr, value in d.items() if not value]:
+        del d[attr]
+    return d.urlencode()

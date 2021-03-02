@@ -18,6 +18,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'suit',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
     'django_extensions',
 
     'social_django',
+    'import_export',
 
     # 'mptt',
     # 'easy_thumbnails',
@@ -52,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.core.middleware.CustomSocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = '%s.urls' % PROJECT_NAME
@@ -192,6 +195,19 @@ SITE_URL = config('SITE_URL', default='')
 
 # SOCIAL_AUTH
 
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'apps.accounts.services.custom_social_auth_pipeline.custom_create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'apps.accounts.services.custom_social_auth_pipeline.custom_user_details',
+)
+
 NO_DEFAULT_PROTECTED_USER_FIELDS = False
 USER_FIELDS = ['name', 'email']
 SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = config('SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY', default='')
@@ -203,6 +219,6 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [
     ('emailAddress', 'email'),
 ]
 
-PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'username']
+PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'username', 'fullname']
 
 USER_FIELD_MAPPING = {'email': 'email', 'fullname': 'name'}

@@ -19,7 +19,7 @@ class UserManager(BaseUserManager):
     def _create_user(self, email,
                      name,
                      password,
-                     is_staff, is_superuser, **extra_fields):
+                     is_staff, is_superuser, is_valid=False, **extra_fields):
         """
         Creates and saves a User with the given username, email and password.
         """
@@ -29,11 +29,17 @@ class UserManager(BaseUserManager):
             raise ValueError('The given email must be set')
 
         email = self.normalize_email(email)
+
+        obj: Optional[None, User] = self.model.objects.filter(email=email).first()
+        if obj:
+            return obj
+
         user = self.model(
             email=email,
             name=name or '',
             is_staff=is_staff, is_active=True,
             is_superuser=is_superuser,
+            is_valid=is_valid,
             date_joined=now,
             last_login=now,
             **extra_fields)
@@ -50,7 +56,7 @@ class UserManager(BaseUserManager):
         Creates and saves a superuser with the given email,
         phone and password.
         """
-        return self._create_user(email, name, password, True, True, **extra_fields)
+        return self._create_user(email, name, password, True, True, True, **extra_fields)
 
     def get_by_natural_key(self, email):
         return self.get(email__iexact=email)
