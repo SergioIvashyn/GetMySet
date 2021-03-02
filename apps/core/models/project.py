@@ -22,7 +22,7 @@ class Project(models.Model):
     url = models.URLField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     description = models.TextField(blank=True)
-    notes = models.CharField(max_length=30)
+    notes = models.CharField(max_length=30, blank=True)
     is_private = models.BooleanField(default=False)
     technologies = models.ManyToManyField('Technology', blank=True, related_name='projects')
     industries = models.ManyToManyField('Industry', blank=True, related_name='projects')
