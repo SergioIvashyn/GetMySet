@@ -11,5 +11,4 @@ def es_handle_create_project(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=Project)
 def es_handle_delete_project(sender, instance, **kwargs):
-    print()
     ProjectElasticSearchModelService().remove_model_from_index(instance)
