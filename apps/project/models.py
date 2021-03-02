@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 from django.db.models import Manager
+from django.utils.translation import ugettext_lazy as _
 
 from apps.industry.models import Industry
 from apps.technology.models import Technology
@@ -32,6 +33,8 @@ class Project(models.Model):
 
     class Meta:
         ordering = ['id']
+        verbose_name = _('Project')
+        verbose_name_plural = _('Projects')
 
     @property
     def is_url_working(self):
