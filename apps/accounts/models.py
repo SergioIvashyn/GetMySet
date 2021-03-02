@@ -45,8 +45,6 @@ class UserManager(BaseUserManager):
             **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
-        if not is_valid:
-            UserEmailSender(user.email).send_activation_message()
         return user
 
     def create_user(self, email, name, password=None, **extra_fields):

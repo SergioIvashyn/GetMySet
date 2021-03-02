@@ -18,6 +18,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'suit',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -193,6 +194,19 @@ EMAIL_USE_SSL = config('EMAIL_USE_SSL', default='NO') == 'YES'
 SITE_URL = config('SITE_URL', default='')
 
 # SOCIAL_AUTH
+
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'apps.accounts.services.custom_social_auth_pipeline.custom_create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'apps.accounts.services.custom_social_auth_pipeline.custom_user_details',
+)
 
 NO_DEFAULT_PROTECTED_USER_FIELDS = False
 USER_FIELDS = ['name', 'email']
