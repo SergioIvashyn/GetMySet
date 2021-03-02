@@ -1,6 +1,6 @@
-from apps.industry.models import Industry
-from apps.project.models import Project
-from apps.technology.models import Technology
+from apps.core.models.industry import Industry
+from apps.core.models.project import Project
+from apps.core.models.technology import Technology
 
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
