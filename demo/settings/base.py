@@ -225,5 +225,5 @@ USER_FIELD_MAPPING = {'email': 'email', 'fullname': 'name'}
 
 # elastic_search
 
-ELASTICSEARCH_URL = config('ELASTIC_SEARCH_URL')
+ELASTICSEARCH_URL = config('ELASTIC_SEARCH_URL', default='')
 
