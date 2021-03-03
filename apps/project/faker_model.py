@@ -1,7 +1,5 @@
 from apps.core.services import FakerModel
-from .models import Project
-from ..industry.models import Industry
-from ..technology.models import Technology
+from apps.core.models import Project, Industry, Technology
 
 
 class ProjectFakerModel(FakerModel):

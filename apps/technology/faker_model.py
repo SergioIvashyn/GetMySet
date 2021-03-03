@@ -1,5 +1,5 @@
 from apps.core.services import FakerModel
-from .models import Technology
+from apps.core.models import Technology
 
 
 class TechnologyFakerModel(FakerModel):
