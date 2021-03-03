@@ -1,5 +1,5 @@
 from apps.core.services import FakerModel
-from apps.industry.models import Industry
+from apps.core.models import Industry
 
 
 class IndustryFakerModel(FakerModel):
