@@ -11,14 +11,11 @@ from import_export.admin import ImportExportModelAdmin
 # Register your models here.
 
 class ProjectImportForm(ImportForm):
-    user = forms.ModelChoiceField(queryset=User.objects.all())
+    user = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
 
 
 class ProjectConfirmImportForm(ConfirmImportForm):
-    user = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput())
-
-    def __init__(self, *args, **kwargs):
-        super(ProjectConfirmImportForm, self).__init__(*args, **kwargs)
+    user = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput(), required=False)
 
 
 class ProjectAdmin(ImportExportModelAdmin):
@@ -26,7 +23,7 @@ class ProjectAdmin(ImportExportModelAdmin):
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         result = super(ProjectAdmin, self).get_resource_kwargs(request, *args, **kwargs)
-        return {**result, **kwargs}
+        return {**result, **kwargs, 'request': request}
 
     def get_import_form(self):
         return ProjectImportForm
