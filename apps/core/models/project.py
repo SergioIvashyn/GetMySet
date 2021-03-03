@@ -19,7 +19,7 @@ class ProjectManager(Manager):
 
 class Project(models.Model):
     name = models.CharField(max_length=100)
-    url = models.URLField()
+    url = models.CharField(max_length=200, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=30, blank=True)
