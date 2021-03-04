@@ -1,6 +1,7 @@
 from typing import Optional
 
 from import_export import resources, fields
+from import_export.results import RowResult
 
 from apps.core.models import Technology, Project, Industry
 from apps.core.services.import_export_widget import FieldToPKManyToManyWidget
@@ -30,3 +31,11 @@ class ProjectResource(resources.ModelResource):
 
     def get_user_id(self) -> Optional[int]:
         return getattr(self.cleaned_data.get('user'), 'id', None) or (self.request.user.id if self.request else None)
+
+    def import_row(self, *args, **kwargs):
+        row_result = super(ProjectResource, self).import_row(*args, **kwargs)
+        if row_result.import_type == row_result.IMPORT_TYPE_INVALID:
+            row_result.import_type = row_result.IMPORT_TYPE_SKIP
+            row_result.diff = [f'{err[0].title()} - {" ".join(err[1])} ' for err in row_result.validation_error]
+            row_result.validation_error = None
+        return row_result
