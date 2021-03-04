@@ -7,5 +7,5 @@ from apps.core.models.technology import Technology
 
 @admin.register(Technology)
 class TechnologyAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name',)
-    ordering = ('id', 'name',)
+    list_display = ('name',)
+    ordering = ('name',)
