@@ -52,17 +52,17 @@
                         <div class="card-body">
                             <h5 class="card-title text-center">{{ obj.name }}</h5>
 
-                            <p class="card-text">Description: {{ obj.description }}</p>
+                            <p class="card-text"><b>Description:</b> {{ obj.description }}</p>
 
-                            <p class="card-text">Industries: {% for industry in obj.industries.all %}
+                            <p class="card-text"><b>Industries:</b> {% for industry in obj.industries.all %}
                                 {{ industry.name }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}</p>
-                            <p>Technologies:
+                            <p><b>Technologies:</b>
                                 {% for technology in obj.technologies.all %}
                                     {{ technology.name }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}</p>
                             <p class="card-text">
-                                {% if not obj.is_url_working %}<b class="text-danger">&times;</b>{% endif %}Url:
+                                {% if not obj.is_url_working %}<b class="text-danger">&times;</b>{% endif %}<b>Url:</b>
                                 <a href="{{ obj.url }}">{{ obj.url }}</a></p>
                             <button class="btn btn-primary">Edit</button>
                             <button class="btn btn-danger float-right">Delete</button>

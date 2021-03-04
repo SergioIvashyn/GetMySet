@@ -6,5 +6,5 @@ from django.contrib import admin
 
 @admin.register(Industry)
 class IndustryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name',)
-    ordering = ('id', 'name',)
+    list_display = ('name',)
+    ordering = ('name',)

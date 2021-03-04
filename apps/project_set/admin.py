@@ -6,6 +6,6 @@ from django.contrib import admin
 
 @admin.register(ProjectSet)
 class ProjectSetAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'url', 'description', 'is_private', 'set', 'is_original']
-    ordering = ('id', 'name', )
+    list_display = ['name', 'url', 'description', 'is_private', 'set', 'is_original']
+    ordering = ('name', )
 
