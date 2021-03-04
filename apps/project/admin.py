@@ -1,9 +1,16 @@
 from django.contrib import admin
 from django import forms
+from django.contrib.contenttypes.models import ContentType
+from django.core import serializers
+from django.core.exceptions import PermissionDenied
 from django.forms import ValidationError
-from import_export.formats.base_formats import CSV
-from import_export.forms import ImportForm, ConfirmImportForm
+from django.http import HttpResponse, HttpResponseRedirect
+from django.template.response import TemplateResponse
+from import_export.formats.base_formats import CSV, XLS
+from import_export.forms import ImportForm, ConfirmImportForm, ExportForm
 from django.utils.translation import gettext_lazy as _
+from import_export.signals import post_export
+
 from apps.accounts.models import User
 from apps.core.models import Project
 from apps.project.resource import ProjectResource
@@ -11,6 +18,10 @@ from import_export.admin import ImportExportModelAdmin
 
 
 # Register your models here.
+
+class ProjectExportForm(ExportForm):
+    user = forms.ModelChoiceField(queryset=User.objects.all())
+
 
 class ProjectImportForm(ImportForm):
     user = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
@@ -37,8 +48,69 @@ class ProjectConfirmImportForm(ConfirmImportForm):
 class ProjectAdmin(ImportExportModelAdmin):
     resource_class = ProjectResource
     from_encoding = "utf-8"
-    formats = (CSV,)
+    formats = (CSV, XLS, )
     import_template_name = 'import_export.html'
+    list_display = ('name', 'url', 'is_private', 'user')
+    actions = [
+        'export_admin_action_as_csv',
+        'export_admin_action_as_xls'
+    ]
+
+    def _export(self, request, queryset, file_format):
+        export_data = self.get_export_data(file_format, queryset, request=request)
+        content_type = file_format.get_content_type()
+        response = HttpResponse(export_data, content_type=content_type)
+        response['Content-Disposition'] = 'attachment; filename="%s"' % (
+            self.get_export_filename(request, queryset, file_format),
+        )
+        return response
+
+    def export_admin_action_as_csv(self, request, queryset):
+        file_format = CSV()
+        return self._export(request, queryset, file_format)
+
+    export_admin_action_as_csv.short_description = _(
+        'Export selected %(verbose_name_plural)s as CSV')
+
+    def export_admin_action_as_xls(self, request, queryset):
+        file_format = XLS()
+        return self._export(request, queryset, file_format)
+
+    export_admin_action_as_xls.short_description = _(
+        'Export selected %(verbose_name_plural)s as XLS')
+
+    def export_action(self, request, *args, **kwargs):
+        if not self.has_export_permission(request):
+            raise PermissionDenied
+
+        formats = self.get_export_formats()
+        form = ProjectExportForm(formats, request.POST or None)
+        if form.is_valid():
+            file_format = formats[
+                int(form.cleaned_data['file_format'])
+            ]()
+            user = form.cleaned_data['user']
+            queryset = self.get_export_queryset(request).filter(user=user)
+            export_data = self.get_export_data(file_format, queryset, request=request)
+            content_type = file_format.get_content_type()
+            response = HttpResponse(export_data, content_type=content_type)
+            response['Content-Disposition'] = 'attachment; filename="%s"' % (
+                self.get_export_filename(request, queryset, file_format),
+            )
+
+            post_export.send(sender=None, model=self.model)
+            return response
+
+        context = self.get_export_context_data()
+
+        context.update(self.admin_site.each_context(request))
+
+        context['title'] = _("Export")
+        context['form'] = form
+        context['opts'] = self.model._meta
+        request.current_app = self.admin_site.name
+        return TemplateResponse(request, [self.export_template_name],
+                                context)
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         result = super(ProjectAdmin, self).get_resource_kwargs(request, *args, **kwargs)

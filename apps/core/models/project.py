@@ -8,12 +8,12 @@ from apps.core.models.technology import Technology
 
 
 class ProjectManager(Manager):
-    def public(self):
-        return self.get_queryset().filter(is_private=False).prefetch_related(
+    def public(self, request):
+        return self.get_queryset().filter(is_private=False, user=request.user).prefetch_related(
             'technologies').prefetch_related('industries')
 
-    def private(self):
-        return self.get_queryset().filter(is_private=True).prefetch_related(
+    def private(self, request):
+        return self.get_queryset().filter(is_private=True, user=request.user).prefetch_related(
             'technologies').prefetch_related('industries')
 
 

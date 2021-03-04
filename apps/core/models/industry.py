@@ -3,7 +3,9 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class IndustryManager(models.Manager):
-    pass
+
+    def project_page_qs(self, request):
+        return self.get_queryset().filter(projects__user=request.user).distinct()
 
 
 class Industry(models.Model):
