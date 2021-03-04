@@ -19,20 +19,10 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
                 "type": "text"
             },
             "technologies": {
-                "type": 'nested',
-                "properties": {
-                    "pk": {"type": "integer"},
-                    "name": {"type": "text"},
-                    "name_keyword": {"type": "keyword"},
-                }
+                "type": 'keyword'
             },
             "industries": {
-                "type": 'nested',
-                "properties": {
-                    "pk": {"type": "integer"},
-                    "name": {"type": "text"},
-                    "name_keyword": {"type": "keyword"},
-                }
+                "type": 'keyword'
             }
         }
     }
@@ -44,8 +34,6 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
         return {
             "name": obj.name,
             "description": obj.description,
-            "technologies": [{"pk": elem.pk, "name": elem.name, "name_keyword": elem.name}
-                             for elem in obj.technologies.all()],
-            "industries": [{"pk": elem.pk, "name": elem.name, "name_keyword": elem.name}
-                           for elem in obj.industries.all()]
+            "technologies": [elem.name for elem in obj.technologies.all()],
+            "industries": [elem.name for elem in obj.industries.all()]
         }
