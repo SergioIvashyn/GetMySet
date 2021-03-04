@@ -6,6 +6,6 @@ from apps.core.models import UserSet
 
 @admin.register(UserSet)
 class UserSetAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'set_user']
+    list_display = ['name', 'set_user']
     ordering = ('name', )
 
