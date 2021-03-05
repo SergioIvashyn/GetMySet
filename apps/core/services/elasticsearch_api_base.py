@@ -1,3 +1,4 @@
+import math
 from typing import Type
 
 from django.conf import settings
@@ -6,6 +7,38 @@ from elasticsearch import Elasticsearch
 from django.utils.translation import ugettext_lazy as _
 
 elasticsearch = Elasticsearch(hosts=settings.ELASTICSEARCH_URL)
+
+
+class ESPagination:
+
+    def __init__(self, count: int, size: int, page: int = 1):
+        self._count = count
+        self._size = size
+        self._page = page
+
+    def page_count(self) -> int:
+        return math.ceil(self._count / self._size if self._size != 0 else 1)
+
+    def current_page(self) -> int:
+        return self._page
+
+    def page_range(self) -> range:
+        return range(1, self.page_count() + 1)
+
+    def has_previous(self) -> bool:
+        return self.current_page() > 1
+
+    def has_next(self) -> bool:
+        return self.page_count() > self.current_page()
+
+    def offset(self) -> int:
+        return self._size * (self._page - 1)
+
+    def next_page_number(self):
+        return self._page + 1
+
+    def previous_page_number(self):
+        return self._page - 1
 
 
 class ElasticSearchModelService:
@@ -17,11 +50,7 @@ class ElasticSearchModelService:
     }
     MAPPING = {}
 
-    _PK = 'pk'
-
     def __init__(self):
-        assert self._PK in self.MAPPING.get('properties', {}), _('You don\'t have primary key field into MAPPING. '
-                                                                 'Please add it.')
         self._es: Elasticsearch = elasticsearch
 
     @property
@@ -62,5 +91,11 @@ class ElasticSearchModelService:
     def delete_index(self) -> None:
         self._es.indices.delete(self.model_index)
 
-    def search(self, *args, **kwargs):
-        return self._es.search(index=self.model_index, *args, **kwargs)
+    def search(self, query) -> dict:
+        return self._es.search(index=self.model_index, body=query)
+
+    def get_ids_from_search_result(self, search: dict) -> list:
+        return [elem.get('_id') for elem in search.get('hits', {}).get('hits', [])]
+
+    def get_qs_from_search_result(self, search) -> object:
+        return self.model.objects.filter(pk__in=self.get_ids_from_search_result(search))

@@ -1,7 +1,5 @@
 from django.contrib import admin
 from django import forms
-from django.contrib.contenttypes.models import ContentType
-from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect

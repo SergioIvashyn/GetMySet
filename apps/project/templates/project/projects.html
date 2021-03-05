@@ -1,39 +1,46 @@
 {% extends "base.html" %}
+{% load core_tags %}
 
 {% block content %}
 
 <h1 class="text-center">Portfolio</h1>
 <div class="row">
-    <div class="col-sm-3  border rounded p-2 col-xs-12">
+    <div class="col-sm-3 col-xs-12">
+    {% if has_filters %}
+    {{ count }} - {{ total_count }} selected
+    {% endif %}
+    <div class="border rounded p-2 mt-3">
     <h3 class="text-center">Industries</h3>
         <div class="form-group p-1">
             <input type="email" class="form-control" id="search_industry" />
-            <button type="button" class="btn btn-warning mt-2">Reset</button>
+            <button type="button" class="btn btn-warning mt-2 industries-reset">Reset</button>
         </div>
-        {% for industry in industries  %}
+        {% for industry in industries %}
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="industry"
-                     value="{{ industry.name }}" id="flexCheckChecked" >
-              <label class="form-check-label" for="flexCheckChecked">
-                 {{ industry.name }}
+              <input class="form-check-input" type="checkbox" name="industries"
+                     value="{{ industry.key }}" id="flexCheckChecked{{ industry.key }}">
+              <label class="form-check-label" for="flexCheckChecked{{ industry.key }}">
+                 {{ industry.key }} <b>{% if has_filters %}+{% endif %}{{ industry.doc_count }}</b>
               </label>
             </div>
         {% endfor %}
+        </div>
+    <div class="border rounded p-2 mt-3">
         <h3 class="text-center">Technologies</h3>
         <div class="form-group p-1">
             <input type="email" class="form-control" id="search_technology" />
-            <button type="button" class="btn btn-warning mt-2">Reset</button>
+            <button type="button" class="btn btn-warning mt-2 technologies-reset">Reset</button>
         </div>
-        {% for technology in technologies  %}
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="technology"
-                     value="{{technology.name}}" id="flexCheckChecked" >
-              <label class="form-check-label" for="flexCheckChecked">
-                 {{ technology.name }}
-              </label>
-            </div>
-
-        {% endfor %}
+                {% for technology in technologies  %}
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="technologies"
+                                 value="{{technology.key}}" id="flexCheckChecked{{ technology.key }}">
+                          <label class="form-check-label" for="flexCheckChecked{{ technology.key }}">
+                             {{ technology.key }} <b>{% if has_filters %}+{% endif %}{{ technology.doc_count }}</b>
+                          </label>
+                        </div>
+                {% endfor %}
+    </div>
     </div>
     <div class="col-sm-9 col-xs-12">
         <div class="w-100">
@@ -43,7 +50,7 @@
             <button class="btn btn-outline-success float-md-right m-1">Upload .csv</button>
         </div>
         <div class="form-group p-1 mt-5">
-            <input type="email" class="form-control" id="search"  placeholder="Search"/>
+            <input class="form-control" id="search"  name='search' placeholder="Search"/>
         </div>
         <div class="row">
             {% for obj in qs %}
@@ -71,28 +78,88 @@
                 </div>
             {% endfor %}
         </div>
-    {% if qs.has_other_pages %}
   <ul class="pagination pagination-lg">
-    {% if qs.has_previous %}
-      <li class="page-item"><a class="page-link" href="?page={{ qs.previous_page_number }}">&laquo;</a></li>
+    {% if pagination.has_previous %}
+      <li class="page-item"><a class="page-link" href="?{% param_replace page=pagination.previous_page_number %}">&laquo;</a></li>
     {% else %}
       <li class="disabled page-item"><span class="page-link">&laquo;</span></li>
     {% endif %}
-    {% for i in qs.paginator.page_range %}
-      {% if qs.number == i %}
+    {% for i in pagination.page_range %}
+      {% if pagination.current_page == i %}
         <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only">(current)</span></span></li>
       {% else %}
-        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+        <li class="page-item"><a class="page-link" href="?{% param_replace page=i %}">{{ i }}</a></li>
       {% endif %}
     {% endfor %}
-    {% if qs.has_next %}
-      <li class="page-item"><a class="page-link" href="?page={{ qs.next_page_number }}">&raquo;</a></li>
+    {% if pagination.has_next %}
+      <li class="page-item"><a class="page-link" href="?{% param_replace page=pagination.next_page_number %}">&raquo;</a></li>
     {% else %}
       <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
     {% endif %}
   </ul>
-{% endif %}
     </div>
 </div>
 
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const params = new URLSearchParams(location.search);
+
+const industriesCheckBoxes = $('input[name="industries"]');
+const industriesSearchInput = $('input#search_industry');
+const searchInput = $('input[name="search"]');
+
+const technologiesCheckBoxes = $('input[name="technologies"]');
+const technologiesSearchInput = $('input#search_technology');
+
+const handleCheckBoxEvent = (e) => {
+    if(e.target.checked){
+        params.append(e.target.name, e.target.value);
+    }else{
+        params.delete(e.target.name);
+    }
+    params.delete('page');
+    location.search = params.toString();
+};
+
+params.forEach((value, key)=>{
+    console.log(value, key);
+    if(key === 'industries' || key === 'technologies'){
+        $(`input[name='${key}'][value='${value}']`).attr("checked", true);
+    }
+    else if(key === 'search'){
+        searchInput.val(value);
+    }
+});
+
+industriesCheckBoxes.on('click', (e)=>{
+    handleCheckBoxEvent(e);
+});
+
+technologiesCheckBoxes.on('click', (e)=>{
+    handleCheckBoxEvent(e);
+});
+
+$('button.technologies-reset').on('click', ()=>{
+    params.delete('technologies');
+    params.delete('page');
+    location.search = params.toString();
+});
+
+$('button.industries-reset').on('click', ()=>{
+    params.delete('industries');
+    params.delete('page');
+    location.search = params.toString();
+});
+
+searchInput.keypress(function (e) {
+  if (e.which === 13) {
+      params.set(e.target.name, e.target.value);
+      location.search = params.toString();
+  }
+});
+
+</script>
 {% endblock %}
