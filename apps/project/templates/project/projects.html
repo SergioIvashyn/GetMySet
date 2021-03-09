@@ -1,42 +1,52 @@
 {% extends "base.html" %}
-{% load core_tags %}
+{% load core_tags i18n %}
 
 {% block content %}
 
-<h1 class="text-center">Portfolio</h1>
+<h1 class="text-center">{{ menu }} {% trans 'portfolio' %}</h1>
 <div class="row">
     <div class="col-sm-3 col-xs-12">
     {% if has_filters %}
-    {{ count }} - {{ total_count }} selected
+    {{ count }} - {{ total_count }} {% trans 'selected' %}
     {% endif %}
     <div class="border rounded p-2 mt-3">
-    <h3 class="text-center">Industries</h3>
+    <h3 class="text-center">{% trans 'Industries' %}</h3>
         <div class="form-group p-1">
-            <input type="email" class="form-control" id="search_industry" />
-            <button type="button" class="btn btn-warning mt-2 industries-reset">Reset</button>
+            <input type="email" class="form-control" id="search_industry" data-toggle="tooltip"
+                   data-placement="left" title="{% trans 'Enter an industry and press Enter' %}"/>
+            <button type="button" class="btn btn-warning mt-2 industries-reset">{% trans 'Reset' %}</button>
         </div>
         {% for industry in industries %}
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="industries"
                      value="{{ industry.key }}" id="flexCheckChecked{{ industry.key }}">
-              <label class="form-check-label" for="flexCheckChecked{{ industry.key }}">
-                 {{ industry.key }} <b>{% if has_filters %}+{% endif %}{{ industry.doc_count }}</b>
+              <label class="form-check-label w-100" for="flexCheckChecked{{ industry.key }}">
+                  <span class="float-left">{{ industry.key }}</span> <span class="float-right">
+                  {% if not industry.is_in_filters %}<b>+{{ industry.doc_count }}</b>
+                          {% else %}
+                              {{ industry.doc_count }}
+                          {% endif %}</span>
               </label>
             </div>
         {% endfor %}
         </div>
     <div class="border rounded p-2 mt-3">
-        <h3 class="text-center">Technologies</h3>
+        <h3 class="text-center">{% trans 'Technologies' %}</h3>
         <div class="form-group p-1">
-            <input type="email" class="form-control" id="search_technology" />
-            <button type="button" class="btn btn-warning mt-2 technologies-reset">Reset</button>
+            <input type="email" class="form-control" id="search_technology" data-toggle="tooltip"
+                   data-placement="left" title="Enter a technology and press Enter" />
+            <button type="button" class="btn btn-warning mt-2 technologies-reset">{% trans 'Reset' %}</button>
         </div>
-                {% for technology in technologies  %}
+                {% for technology in technologies %}
                         <div class="form-check">
                           <input class="form-check-input" type="checkbox" name="technologies"
                                  value="{{technology.key}}" id="flexCheckChecked{{ technology.key }}">
-                          <label class="form-check-label" for="flexCheckChecked{{ technology.key }}">
-                             {{ technology.key }} <b>{% if has_filters %}+{% endif %}{{ technology.doc_count }}</b>
+                          <label class="form-check-label w-100" for="flexCheckChecked{{ technology.key }}">
+                              <span class="float-left">{{ technology.key }}</span>
+                              <span class="float-right">{% if not technology.is_in_filters %}<b>+{{ technology.doc_count }}</b>
+                          {% else %}
+                              {{ technology.doc_count }}
+                          {% endif %}</span>
                           </label>
                         </div>
                 {% endfor %}
@@ -44,13 +54,14 @@
     </div>
     <div class="col-sm-9 col-xs-12">
         <div class="w-100">
-            <button class="btn btn-outline-primary float-md-left m-1">Add new project</button>
-            <button class="btn btn-outline-danger float-md-right m-1">Delete all</button>
-            <button class="btn btn-outline-primary float-md-right m-1">Add new set</button>
-            <button class="btn btn-outline-success float-md-right m-1">Upload .csv</button>
+            <button class="btn btn-outline-primary float-md-left m-1">{% trans 'Add new project' %}</button>
+            <button class="btn btn-outline-danger float-md-right m-1">{% trans 'Delete all' %}</button>
+            <button class="btn btn-outline-primary float-md-right m-1">{% trans 'Add new set' %}</button>
+            <button class="btn btn-outline-success float-md-right m-1">{% trans 'Upload .csv' %}</button>
         </div>
         <div class="form-group p-1 mt-5">
-            <input class="form-control" id="search"  name='search' placeholder="Search"/>
+            <input class="form-control" id="search"  name='search' placeholder="Search" data-toggle="tooltip"
+                   data-placement="bottom" title="{% trans 'Enter a search query and press Enter' %}" />
         </div>
         <div class="row">
             {% for obj in qs %}
@@ -58,21 +69,20 @@
                     <div class="card p-3 m-3">
                         <div class="card-body">
                             <h5 class="card-title text-center">{{ obj.name }}</h5>
-
-                            <p class="card-text"><b>Description:</b> {{ obj.description }}</p>
-
-                            <p class="card-text"><b>Industries:</b> {% for industry in obj.industries.all %}
-                                {{ industry.name }}{% if not forloop.last %}, {% endif %}
+                            <p class="card-text"><b>{% trans 'Description:' %}</b> {{ obj.description }}</p>
+                            <p class="card-text"><b>{% trans 'Industries:' %}</b> {% for industry in obj.industries.all %}
+                                <a href="">{{ industry.name }}</a>{% if not forloop.last %}, {% endif %}
                             {% endfor %}</p>
-                            <p><b>Technologies:</b>
+                            <p><b>{% trans 'Technologies:' %}</b>
                                 {% for technology in obj.technologies.all %}
-                                    {{ technology.name }}{% if not forloop.last %}, {% endif %}
+                                    <button class="btn btn-link">
+                                        {{ technology.name }}</button>{% if not forloop.last %},{% endif %}
                                 {% endfor %}</p>
                             <p class="card-text">
-                                {% if not obj.is_url_working %}<b class="text-danger">&times;</b>{% endif %}<b>Url:</b>
+                                {% if not obj.is_url_working %}<b class="text-danger">&times;</b>{% endif %}<b>{% trans 'Url:' %}</b>
                                 <a href="{{ obj.url }}">{{ obj.url }}</a></p>
-                            <button class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger float-right">Delete</button>
+                            <button class="btn btn-primary">{% trans 'Edit' %}</button>
+                            <button class="btn btn-danger float-right">{% trans 'Delete' %}</button>
                         </div>
                     </div>
                 </div>
@@ -105,12 +115,11 @@
 
 {% block extra_js %}
 <script>
+$('[data-toggle="tooltip"]').tooltip();
 const params = new URLSearchParams(location.search);
-
 const industriesCheckBoxes = $('input[name="industries"]');
 const industriesSearchInput = $('input#search_industry');
 const searchInput = $('input[name="search"]');
-
 const technologiesCheckBoxes = $('input[name="technologies"]');
 const technologiesSearchInput = $('input#search_technology');
 
@@ -118,14 +127,17 @@ const handleCheckBoxEvent = (e) => {
     if(e.target.checked){
         params.append(e.target.name, e.target.value);
     }else{
+        let previousParams = params.getAll(e.target.name);
         params.delete(e.target.name);
+        previousParams.filter((elem)=>{return elem !== e.target.value}).forEach((value, _)=>{
+            params.append(e.target.name, value);
+        });
     }
     params.delete('page');
     location.search = params.toString();
 };
 
 params.forEach((value, key)=>{
-    console.log(value, key);
     if(key === 'industries' || key === 'technologies'){
         $(`input[name='${key}'][value='${value}']`).attr("checked", true);
     }
@@ -154,12 +166,36 @@ $('button.industries-reset').on('click', ()=>{
     location.search = params.toString();
 });
 
-searchInput.keypress(function (e) {
+searchInput.keypress((e) => {
   if (e.which === 13) {
       params.set(e.target.name, e.target.value);
+      params.delete('page');
       location.search = params.toString();
   }
 });
 
+technologiesSearchInput.keypress((e)=> {
+    if (e.which === 13) {
+        technologiesCheckBoxes.show();
+        technologiesCheckBoxes.next('label').show();
+        let filterResult = technologiesCheckBoxes.filter(function (){
+            return !this.value.toLowerCase().includes(e.target.value.toLowerCase());
+        });
+        filterResult.hide();
+        filterResult.next('label').hide();
+    }
+});
+
+industriesSearchInput.keypress((e)=>{
+    if (e.which === 13) {
+        industriesCheckBoxes.show();
+        industriesCheckBoxes.next('label').show();
+        let filterResult = industriesCheckBoxes.filter(function (){
+            return !this.value.toLowerCase().includes(e.target.value.toLowerCase());
+        });
+        filterResult.hide();
+        filterResult.next('label').hide();
+    }
+});
 </script>
 {% endblock %}

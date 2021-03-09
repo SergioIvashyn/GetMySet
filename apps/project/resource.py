@@ -1,7 +1,6 @@
 from typing import Optional
 
 from import_export import resources, fields
-from import_export.results import RowResult
 
 from apps.core.models import Technology, Project, Industry
 from apps.core.services.import_export_widget import FieldToPKManyToManyWidget
@@ -39,3 +38,7 @@ class ProjectResource(resources.ModelResource):
             row_result.diff = [f'{err[0].title()} - {" ".join(err[1])} ' for err in row_result.validation_error]
             row_result.validation_error = None
         return row_result
+
+    def save_m2m(self, obj, data, using_transactions, dry_run):
+        super(ProjectResource, self).save_m2m(obj, data, using_transactions, dry_run)
+        obj.save(add_to_es=True, refresh=False)

@@ -73,8 +73,8 @@ class ElasticSearchModelService:
             self._es.indices.create(index=self.model_index, body=self.get_index_settings())
         return not exist
 
-    def indexing_model(self, obj: Model) -> 'ElasticSearchModelService':
-        self._es.index(index=self.model_index, id=obj.pk, body=self.get_model_body(obj))
+    def indexing_model(self, obj: Model, refresh=False) -> 'ElasticSearchModelService':
+        self._es.index(index=self.model_index, id=obj.pk, body=self.get_model_body(obj), refresh=refresh)
         return self
 
     def remove_model_from_index(self, obj: Model) -> 'ElasticSearchModelService':
@@ -97,5 +97,5 @@ class ElasticSearchModelService:
     def get_ids_from_search_result(self, search: dict) -> list:
         return [elem.get('_id') for elem in search.get('hits', {}).get('hits', [])]
 
-    def get_qs_from_search_result(self, search) -> object:
+    def get_qs_from_search_result(self, search) -> dict:
         return self.model.objects.filter(pk__in=self.get_ids_from_search_result(search))

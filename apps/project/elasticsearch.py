@@ -1,13 +1,15 @@
 import math
-from typing import Optional, OrderedDict
+from typing import Optional, List
 
+from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import QuerySet
 from apps.core.services.elasticsearch_api_base import ElasticSearchModelService, ESPagination
-from apps.core.models import Project
+from apps.core import models
+from django.utils.translation import gettext_lazy as _
 
 
 class ProjectElasticSearchModelService(ElasticSearchModelService):
-    model = Project
+    model = models.Project
 
     PAGINATION_SIZE = 3
 
@@ -37,7 +39,7 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
     def get_query_set(self) -> QuerySet:
         return self.model.objects.all().prefetch_related('technologies').prefetch_related('industries')
 
-    def get_model_body(self, obj: Project) -> dict:
+    def get_model_body(self, obj: models.Project) -> dict:
         return {
             "name": obj.name,
             "user": obj.user_id,
@@ -47,52 +49,104 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
             "industries": [elem.name for elem in obj.industries.all()]
         }
 
-    def filter_projects_context(self, request, is_private: bool):
-        query_params: OrderedDict = request.GET
+    def filter_projects_context(self, request: WSGIRequest, is_private: bool):
+        query_params = request.GET
         page = int(query_params.get('page', 1))
         search = query_params.get('search')
-        technologies = query_params.get('technologies')
-        industries = query_params.get('industries')
+        technologies = query_params.getlist('technologies')
+        industries = query_params.getlist('industries')
         user = request.user.pk
         result = self.filter_projects(page=page, search=search, is_private=is_private, user=user,
                                       industries=industries, technologies=technologies)
-        return result
+        return {**result, 'menu': _('Private') if is_private else _('Public')}
+
+    @staticmethod
+    def build_unfiltered_aggregation(key: str, filters: list) -> dict:
+        return {
+            "global": {},
+            "aggs": {
+                key: {
+                    "aggs": {
+                        "key": {
+                            "terms": {
+                                "field": key, "exclude": [""]
+                            }
+                        }
+                    },
+                    "filter": {
+                        "bool": {
+                            "must": filters
+                        }
+                    }
+                }
+            }
+        }
+
+    @staticmethod
+    def get_aggregation_result(filtered_result: List[dict],
+                               unfiltered_result: List[dict], searched_entities: List[str]) -> list:
+        if not searched_entities:
+            return sorted([{**elem, 'is_in_filters': True} for elem in filtered_result], key=lambda x: x.get('key'))
+        result = []
+        set_searched_entities = frozenset(searched_entities)
+        dict_filtered_result = {elem.get('key'): elem.get('doc_count', 0) for elem in filtered_result}
+        for elem in unfiltered_result:
+            if elem.get('key') in set_searched_entities:
+                result.append({**elem, 'is_in_filters': True})
+            else:
+                key = elem.get('key')
+                doc_count = elem.get('doc_count')
+                if dict_filtered_result.get(key) and doc_count - dict_filtered_result.get(key, 0) > 0:
+                    result.append({'key': key,
+                                   'doc_count': doc_count - dict_filtered_result.get(key, 0),
+                                   'is_in_filters': False})
+        return sorted(result, key=lambda x: x.get('key'))
 
     def filter_projects(self, page: int = 1, search: Optional[str] = None,
                         user: Optional[int] = None, is_private: Optional[bool] = None,
                         industries: Optional[list] = None, technologies: Optional[list] = None):
-        size = self.PAGINATION_SIZE
-        query = []
+        required_query = []
+        industries_aggregation_query = []
+        technologies_aggregation_query = []
         if search:
-            query.append({"query_string": {"query": search, "fields": ["name", "description"]}})
+            required_query.append({"query_string": {"query": search, "fields": ["name", "description"]}})
         if user:
-            query.append({"term": {"user": user}})
+            required_query.append({"term": {"user": user}})
         if industries:
-            query.append({"term": {"industries": industries}})
-        if is_private is not None:
-            query.append({"term": {"is_private": is_private}})
+            technologies_aggregation_query.append({"terms": {"industries": industries}})
         if technologies:
-            query.append({"term": {"technologies": technologies}})
-        body = {"query": {"bool": {"must": query}}}
-        total_count = self._es.count(index=self.model_index, body=body).get('count')
-        pagination = ESPagination(size=size, count=total_count, page=page)
+            industries_aggregation_query.append({"terms": {"technologies": technologies}})
+        if is_private is not None:
+            required_query.append({"term": {"is_private": is_private}})
 
+        body = {"query": {"bool": {"must": [*required_query, *industries_aggregation_query,
+                                            *technologies_aggregation_query]}}}
+        documents_count = self._es.count(index=self.model_index, body=body).get('count')
+        pagination = ESPagination(size=self.PAGINATION_SIZE, count=documents_count, page=page)
         response = self.search({
-            "from": pagination.offset(), "size": size,
-            **body,
+            "from": pagination.offset(), "size": self.PAGINATION_SIZE, **body,
             "aggs": {
                 "technologies": {"terms": {"field": "technologies", "exclude": [""]}},
-                "industries": {"terms": {"field": "industries", "exclude": [""]}}
+                "industries": {"terms": {"field": "industries", "exclude": [""]}},
+                "total_count": {"global": {}, "aggs": {"total_count": {"filter": {"bool": {"must": required_query}}}}},
+                "unfiltered_technologies": self.build_unfiltered_aggregation(
+                    'technologies', [*required_query, *technologies_aggregation_query]),
+                "unfiltered_industries": self.build_unfiltered_aggregation(
+                    'industries', [*required_query, *industries_aggregation_query]),
             }
         })
+        filtered_industries = response.get('aggregations', {}).get('industries', {}).get('buckets', [])
+        unfiltered_industries = response.get('aggregations', {}).get(
+            'unfiltered_industries', {}).get('industries', {}).get('key', {}).get('buckets', [])
+        filtered_technologies = response.get('aggregations', {}).get('technologies', {}).get('buckets', [])
+        unfiltered_technologies = response.get('aggregations', {}).get(
+            'unfiltered_technologies', {}).get('technologies', {}).get('key', {}).get('buckets', [])
         return {
             'count': response.get('hits', {}).get('total', {}).get('value', 0),
-            'total_count': total_count,
-            'pagination': pagination,
-            'qs': self.get_qs_from_search_result(response),
-            'technologies': sorted(response.get('aggregations', {}).get('technologies', {}).get('buckets', []),
-                                   key=lambda x: x.get('key')),
-            'industries': sorted(response.get('aggregations', {}).get('industries', {}).get('buckets', []),
-                                 key=lambda x: x.get('key')),
+            'total_count': response.get('aggregations', {}).get('total_count', {}).get('total_count', {}
+                                                                                       ).get("doc_count", 0),
+            'pagination': pagination, 'qs': self.get_qs_from_search_result(response),
+            'technologies': self.get_aggregation_result(filtered_technologies, unfiltered_technologies, technologies),
+            'industries': self.get_aggregation_result(filtered_industries, unfiltered_industries, industries),
             'has_filters': any([bool(search), bool(industries), bool(technologies)]),
         }

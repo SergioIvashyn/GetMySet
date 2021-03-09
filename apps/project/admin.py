@@ -125,5 +125,8 @@ class ProjectAdmin(ImportExportModelAdmin):
             kwargs['user'] = form.cleaned_data.get('user', None)
         return kwargs
 
+    def save_model(self, request, obj, form, change):
+        obj.save(add_to_es=True, refresh=True)
+
 
 admin.site.register(Project, ProjectAdmin)

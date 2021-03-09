@@ -1,3 +1,4 @@
+{% load  i18n %}
 
 <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
@@ -9,13 +10,13 @@
     <ul class="navbar-nav">
         {% if request.user.is_authenticated %}
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'private_projects' %}">Private</a>
+                <a class="nav-link" href="{% url 'private_projects' %}">{% trans 'Private' %}</a>
             </li>
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'public_projects' %}">Public</a>
+                <a class="nav-link" href="{% url 'public_projects' %}">{% trans 'Public' %}</a>
             </li>
             <li class="nav-item active">
-                <a class="nav-link" href="">My Set</a>
+                <a class="nav-link" href="">{% trans 'My Set' %}</a>
             </li>
         {% endif %}
     </ul>
@@ -23,23 +24,23 @@
         {% if request.user.is_authenticated %}
             {% if request.user.is_superuser %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/">Admin Console</a>
+                    <a class="nav-link" href="/admin/">{% trans 'Admin Console' %}</a>
                 </li>
             {% endif %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'personal_information' %}">Hello, {{ request.user.name }}</a>
+                <a class="nav-link" href="{% url 'personal_information' %}">{% trans 'Hello' %}, {{ request.user.name }}</a>
             </li>
             <li class="nav-item">
             <a  class="nav-link" data-toggle="modal" data-target="#exampleModal">
-              Log Out
+              {% trans 'Log Out' %}
             </a>
             </li>
         {% else %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'register' %}">Sign Up</a>
+                <a class="nav-link" href="{% url 'register' %}">{% trans 'Sign Up' %}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                <a class="nav-link" href="{% url 'login' %}">{% trans 'Log In' %}</a>
             </li>
         {% endif %}
     </ul>
@@ -52,15 +53,15 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Are you sure you want to log out of your account?</h5>
+        <h5 class="modal-title" id="exampleModalLabel">{% trans 'Are you sure you want to log out of your account?' %}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-        <a type="button" class="btn btn-primary" href="{% url 'logout' %}">Yes</a>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'No' %}</button>
+        <a type="button" class="btn btn-primary" href="{% url 'logout' %}">{% trans 'Yes' %}</a>
       </div>
     </div>
   </div>

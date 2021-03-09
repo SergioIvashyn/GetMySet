@@ -7,4 +7,4 @@ class ProjectConfig(AppConfig):
     verbose_name = _('Projects')
 
     def ready(self):
-        from .signals import es_handle_create_project, es_handle_delete_project
+        from .signals import es_handle_delete_project

@@ -34,6 +34,14 @@ class Project(models.Model):
         verbose_name = _('Project')
         verbose_name_plural = _('Projects')
 
+    def save(self, *args, **kwargs):
+        from apps.project.elasticsearch import ProjectElasticSearchModelService
+        refresh = kwargs.pop('refresh', False)
+        add_to_es = kwargs.pop('add_to_es', False)
+        super(Project, self).save(*args, **kwargs)
+        if add_to_es:
+            ProjectElasticSearchModelService().indexing_model(self, refresh)
+
     @property
     def is_url_working(self):
         return not bool(self.notes)
