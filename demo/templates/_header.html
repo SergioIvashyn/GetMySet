@@ -9,13 +9,13 @@
   <div class="collapse navbar-collapse d-lg-flex justify-content-lg-between" id="navbarNav">
     <ul class="navbar-nav">
         {% if request.user.is_authenticated %}
-            <li class="nav-item active">
+            <li class="nav-item {% if request.resolver_match.url_name == "private_projects" %}active{% endif %}">
                 <a class="nav-link" href="{% url 'private_projects' %}">{% trans 'Private' %}</a>
             </li>
-            <li class="nav-item active">
+            <li class="nav-item {% if request.resolver_match.url_name == "public_projects" %}active{% endif %}">
                 <a class="nav-link" href="{% url 'public_projects' %}">{% trans 'Public' %}</a>
             </li>
-            <li class="nav-item active">
+            <li class="nav-item {% if request.resolver_match.url_name == "my_view_name" %}active{% endif %}">
                 <a class="nav-link" href="">{% trans 'My Set' %}</a>
             </li>
         {% endif %}

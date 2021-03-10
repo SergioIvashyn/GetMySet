@@ -1,6 +1,35 @@
 {% extends "base.html" %}
 {% load core_tags i18n %}
+{% block extra_css %}
+<style>
+::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-button::-moz-focus-inner {
+   border: 0 !important;
+}
+.custom-button{
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    outline:none !important;
+}
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 10px;
+}
 
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+
+.check-box-group{
+    max-height: 300px;
+    overflow: auto;
+}
+</style>
+{% endblock %}
 {% block content %}
 
 <h1 class="text-center">{{ menu }} {% trans 'portfolio' %}</h1>
@@ -13,9 +42,10 @@
     <h3 class="text-center">{% trans 'Industries' %}</h3>
         <div class="form-group p-1">
             <input type="email" class="form-control" id="search_industry" data-toggle="tooltip"
-                   data-placement="left" title="{% trans 'Enter an industry and press Enter' %}"/>
+                   data-placement="top" title="{% trans 'Enter an industry and press Enter' %}"/>
             <button type="button" class="btn btn-warning mt-2 industries-reset">{% trans 'Reset' %}</button>
         </div>
+        <div class="check-box-group">
         {% for industry in industries %}
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="industries"
@@ -30,13 +60,15 @@
             </div>
         {% endfor %}
         </div>
+        </div>
     <div class="border rounded p-2 mt-3">
         <h3 class="text-center">{% trans 'Technologies' %}</h3>
         <div class="form-group p-1">
             <input type="email" class="form-control" id="search_technology" data-toggle="tooltip"
-                   data-placement="left" title="Enter a technology and press Enter" />
+                   data-placement="top" title="Enter a technology and press Enter" />
             <button type="button" class="btn btn-warning mt-2 technologies-reset">{% trans 'Reset' %}</button>
         </div>
+        <div class="check-box-group">
                 {% for technology in technologies %}
                         <div class="form-check">
                           <input class="form-check-input" type="checkbox" name="technologies"
@@ -50,6 +82,7 @@
                           </label>
                         </div>
                 {% endfor %}
+        </div>
     </div>
     </div>
     <div class="col-sm-9 col-xs-12">
@@ -57,7 +90,8 @@
             <button class="btn btn-outline-primary float-md-left m-1">{% trans 'Add new project' %}</button>
             <button class="btn btn-outline-danger float-md-right m-1">{% trans 'Delete all' %}</button>
             <button class="btn btn-outline-primary float-md-right m-1">{% trans 'Add new set' %}</button>
-            <button class="btn btn-outline-success float-md-right m-1">{% trans 'Upload .csv' %}</button>
+            <a href="{% url 'import_projects' %}" class="btn btn-outline-success float-md-right m-1 text-success">
+                {% trans 'Upload .csv' %}</a>
         </div>
         <div class="form-group p-1 mt-5">
             <input class="form-control" id="search"  name='search' placeholder="Search" data-toggle="tooltip"
@@ -69,17 +103,18 @@
                     <div class="card p-3 m-3">
                         <div class="card-body">
                             <h5 class="card-title text-center">{{ obj.name }}</h5>
-                            <p class="card-text"><b>{% trans 'Description:' %}</b> {{ obj.description }}</p>
+                            <p class="card-text"><b>{% trans 'Description:' %}</b> {{ obj.description|safe  }}</p>
                             <p class="card-text"><b>{% trans 'Industries:' %}</b> {% for industry in obj.industries.all %}
-                                <a href="">{{ industry.name }}</a>{% if not forloop.last %}, {% endif %}
+                                <button class=" btn custom-button btn-link" value="industries">
+                                    {{ industry.name }}</button>{% if not forloop.last %}, {% endif %}
                             {% endfor %}</p>
                             <p><b>{% trans 'Technologies:' %}</b>
                                 {% for technology in obj.technologies.all %}
-                                    <button class="btn btn-link">
+                                    <button class=" btn custom-button btn-link" value="technologies">
                                         {{ technology.name }}</button>{% if not forloop.last %},{% endif %}
                                 {% endfor %}</p>
                             <p class="card-text">
-                                {% if not obj.is_url_working %}<b class="text-danger">&times;</b>{% endif %}<b>{% trans 'Url:' %}</b>
+                                {% if not obj.is_url_working %}<b class="text-danger">&times;</b>{% endif %}<b>{% trans 'URL:' %}</b>
                                 <a href="{{ obj.url }}">{{ obj.url }}</a></p>
                             <button class="btn btn-primary">{% trans 'Edit' %}</button>
                             <button class="btn btn-danger float-right">{% trans 'Delete' %}</button>
@@ -118,6 +153,7 @@
 $('[data-toggle="tooltip"]').tooltip();
 const params = new URLSearchParams(location.search);
 const industriesCheckBoxes = $('input[name="industries"]');
+const buttonsLink = $('.custom-button');
 const industriesSearchInput = $('input#search_industry');
 const searchInput = $('input[name="search"]');
 const technologiesCheckBoxes = $('input[name="technologies"]');
@@ -197,5 +233,14 @@ industriesSearchInput.keypress((e)=>{
         filterResult.next('label').hide();
     }
 });
+
+buttonsLink.on('click', (e)=>{
+    let text = $(e.target).text().trim();
+    if (!params.getAll(e.target.value).includes(text)){
+        params.append(e.target.value, $(e.target).text().trim());
+        params.delete('page');
+        location.search = params.toString();
+    }
+})
 </script>
 {% endblock %}

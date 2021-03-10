@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 class ProjectElasticSearchModelService(ElasticSearchModelService):
     model = models.Project
 
-    PAGINATION_SIZE = 3
+    PAGINATION_SIZE = 10
 
     MAPPING = {
         "properties": {
@@ -69,7 +69,7 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
                     "aggs": {
                         "key": {
                             "terms": {
-                                "field": key, "exclude": [""]
+                                "field": key, "exclude": [""], "size": 10000
                             }
                         }
                     },
@@ -106,10 +106,12 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
                         user: Optional[int] = None, is_private: Optional[bool] = None,
                         industries: Optional[list] = None, technologies: Optional[list] = None):
         required_query = []
+        search_query = []
         industries_aggregation_query = []
         technologies_aggregation_query = []
         if search:
-            required_query.append({"query_string": {"query": search, "fields": ["name", "description"]}})
+            search_query.append(
+                {"multi_match": {"query": search, "type": "phrase_prefix", "fields": ["name", "description"]}})
         if user:
             required_query.append({"term": {"user": user}})
         if industries:
@@ -119,20 +121,20 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
         if is_private is not None:
             required_query.append({"term": {"is_private": is_private}})
 
-        body = {"query": {"bool": {"must": [*required_query, *industries_aggregation_query,
+        body = {"query": {"bool": {"must": [*required_query, *search_query, *industries_aggregation_query,
                                             *technologies_aggregation_query]}}}
         documents_count = self._es.count(index=self.model_index, body=body).get('count')
         pagination = ESPagination(size=self.PAGINATION_SIZE, count=documents_count, page=page)
         response = self.search({
             "from": pagination.offset(), "size": self.PAGINATION_SIZE, **body,
             "aggs": {
-                "technologies": {"terms": {"field": "technologies", "exclude": [""]}},
-                "industries": {"terms": {"field": "industries", "exclude": [""]}},
+                "technologies": {"terms": {"field": "technologies", "exclude": [""], "size": 10000}},
+                "industries": {"terms": {"field": "industries", "exclude": [""], "size": 10000}},
                 "total_count": {"global": {}, "aggs": {"total_count": {"filter": {"bool": {"must": required_query}}}}},
                 "unfiltered_technologies": self.build_unfiltered_aggregation(
-                    'technologies', [*required_query, *technologies_aggregation_query]),
+                    'technologies', [*required_query, *technologies_aggregation_query, *search_query]),
                 "unfiltered_industries": self.build_unfiltered_aggregation(
-                    'industries', [*required_query, *industries_aggregation_query]),
+                    'industries', [*required_query, *industries_aggregation_query, *search_query]),
             }
         })
         filtered_industries = response.get('aggregations', {}).get('industries', {}).get('buckets', [])
