@@ -112,7 +112,7 @@ class ProjectAdmin(ImportExportModelAdmin):
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         result = super(ProjectAdmin, self).get_resource_kwargs(request, *args, **kwargs)
-        return {**result, **kwargs, 'request': request}
+        return {**result, **kwargs, 'user': request.user}
 
     def get_import_form(self):
         return ProjectImportForm

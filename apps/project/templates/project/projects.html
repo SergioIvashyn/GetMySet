@@ -5,6 +5,11 @@
 ::-webkit-scrollbar {
     width: 6px;
 }
+
+.contents{
+display: contents;
+}
+
 .custom-button::-moz-focus-inner {
    border: 0 !important;
 }
@@ -32,11 +37,18 @@
 {% endblock %}
 {% block content %}
 
-<h1 class="text-center">{{ menu }} {% trans 'portfolio' %}</h1>
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+{% endif %}
 <div class="row">
     <div class="col-sm-3 col-xs-12">
     {% if has_filters %}
-    {{ count }} - {{ total_count }} {% trans 'selected' %}
+        {% trans 'Selected' %} {{ count }} {% trans 'projects from' %} {{ total_count }} {% trans 'total' %}
     {% endif %}
     <div class="border rounded p-2 mt-3">
     <h3 class="text-center">{% trans 'Industries' %}</h3>
@@ -45,13 +57,15 @@
                    data-placement="top" title="{% trans 'Enter an industry and press Enter' %}"/>
             <button type="button" class="btn btn-warning mt-2 industries-reset">{% trans 'Reset' %}</button>
         </div>
+
         <div class="check-box-group">
+        {% if qs_exists %}
         {% for industry in industries %}
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="industries"
                      value="{{ industry.key }}" id="flexCheckChecked{{ industry.key }}">
-              <label class="form-check-label w-100" for="flexCheckChecked{{ industry.key }}">
-                  <span class="float-left">{{ industry.key }}</span> <span class="float-right">
+              <label class="form-check-label w-100 pr-1" for="flexCheckChecked{{ industry.key }}">
+                 {{ industry.key }}<span class="float-right">
                   {% if not industry.is_in_filters %}<b>+{{ industry.doc_count }}</b>
                           {% else %}
                               {{ industry.doc_count }}
@@ -59,8 +73,13 @@
               </label>
             </div>
         {% endfor %}
+            {% else %}
+            {% trans 'There is no any content' %}
+        {% endif %}
         </div>
         </div>
+
+
     <div class="border rounded p-2 mt-3">
         <h3 class="text-center">{% trans 'Technologies' %}</h3>
         <div class="form-group p-1">
@@ -68,13 +87,15 @@
                    data-placement="top" title="Enter a technology and press Enter" />
             <button type="button" class="btn btn-warning mt-2 technologies-reset">{% trans 'Reset' %}</button>
         </div>
+
         <div class="check-box-group">
+                {% if qs_exists %}
                 {% for technology in technologies %}
                         <div class="form-check">
                           <input class="form-check-input" type="checkbox" name="technologies"
                                  value="{{technology.key}}" id="flexCheckChecked{{ technology.key }}">
-                          <label class="form-check-label w-100" for="flexCheckChecked{{ technology.key }}">
-                              <span class="float-left">{{ technology.key }}</span>
+                          <label class="form-check-label pr-1  w-100" for="flexCheckChecked{{ technology.key }}">
+                              {{ technology.key }}
                               <span class="float-right">{% if not technology.is_in_filters %}<b>+{{ technology.doc_count }}</b>
                           {% else %}
                               {{ technology.doc_count }}
@@ -82,10 +103,17 @@
                           </label>
                         </div>
                 {% endfor %}
+        {% else %}
+                     {% trans 'There is no any content' %}
+                {% endif %}
         </div>
+
     </div>
+
     </div>
+
     <div class="col-sm-9 col-xs-12">
+    <h1 class="text-center mb-5">{{ menu }} {% trans 'portfolio' %}</h1>
         <div class="w-100">
             <button class="btn btn-outline-primary float-md-left m-1">{% trans 'Add new project' %}</button>
             <button class="btn btn-outline-danger float-md-right m-1">{% trans 'Delete all' %}</button>
@@ -94,10 +122,11 @@
                 {% trans 'Upload .csv' %}</a>
         </div>
         <div class="form-group p-1 mt-5">
-            <input class="form-control" id="search"  name='search' placeholder="Search" data-toggle="tooltip"
+            <input class="form-control mt-5" id="search"  name='search' placeholder="Search" data-toggle="tooltip"
                    data-placement="bottom" title="{% trans 'Enter a search query and press Enter' %}" />
         </div>
         <div class="row">
+            {% if qs_exists %}
             {% for obj in qs %}
                 <div class="col-12">
                     <div class="card p-3 m-3">
@@ -122,7 +151,11 @@
                     </div>
                 </div>
             {% endfor %}
+                {% else %}
+                {% trans 'There is no any content yet' %}
+        {% endif %}
         </div>
+    {% if pagination.has_other_pages and qs_exists %}
   <ul class="pagination pagination-lg">
     {% if pagination.has_previous %}
       <li class="page-item"><a class="page-link" href="?{% param_replace page=pagination.previous_page_number %}">&laquo;</a></li>
@@ -142,6 +175,7 @@
       <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
     {% endif %}
   </ul>
+    {% endif %}
     </div>
 </div>
 

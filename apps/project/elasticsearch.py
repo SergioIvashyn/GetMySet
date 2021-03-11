@@ -88,19 +88,19 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
         if not searched_entities:
             return sorted([{**elem, 'is_in_filters': True} for elem in filtered_result], key=lambda x: x.get('key'))
         result = []
-        set_searched_entities = frozenset(searched_entities)
+        searched_entities_set = frozenset(searched_entities)
         dict_filtered_result = {elem.get('key'): elem.get('doc_count', 0) for elem in filtered_result}
         for elem in unfiltered_result:
-            if elem.get('key') in set_searched_entities:
+            if elem.get('key') in searched_entities_set:
                 result.append({**elem, 'is_in_filters': True})
             else:
                 key = elem.get('key')
                 doc_count = elem.get('doc_count')
-                if dict_filtered_result.get(key) and doc_count - dict_filtered_result.get(key, 0) > 0:
+                if dict_filtered_result.get(key):
                     result.append({'key': key,
                                    'doc_count': doc_count - dict_filtered_result.get(key, 0),
                                    'is_in_filters': False})
-        return sorted(result, key=lambda x: x.get('key'))
+        return sorted(result, key=lambda x: x.get('key') if x.get('key') not in searched_entities else "A")
 
     def filter_projects(self, page: int = 1, search: Optional[str] = None,
                         user: Optional[int] = None, is_private: Optional[bool] = None,
@@ -137,18 +137,19 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
                     'industries', [*required_query, *industries_aggregation_query, *search_query]),
             }
         })
-        filtered_industries = response.get('aggregations', {}).get('industries', {}).get('buckets', [])
-        unfiltered_industries = response.get('aggregations', {}).get(
-            'unfiltered_industries', {}).get('industries', {}).get('key', {}).get('buckets', [])
-        filtered_technologies = response.get('aggregations', {}).get('technologies', {}).get('buckets', [])
-        unfiltered_technologies = response.get('aggregations', {}).get(
-            'unfiltered_technologies', {}).get('technologies', {}).get('key', {}).get('buckets', [])
+        filtered_industries = response['aggregations']['industries']['buckets']
+        unfiltered_industries = response['aggregations']['unfiltered_industries']['industries']['key']['buckets']
+        filtered_technologies = response['aggregations']['technologies']['buckets']
+        unfiltered_technologies = response['aggregations']['unfiltered_technologies']['technologies']['key']['buckets']
+        qs = self.get_qs_from_search_result(response)
         return {
-            'count': response.get('hits', {}).get('total', {}).get('value', 0),
-            'total_count': response.get('aggregations', {}).get('total_count', {}).get('total_count', {}
-                                                                                       ).get("doc_count", 0),
-            'pagination': pagination, 'qs': self.get_qs_from_search_result(response),
+            'count': response['hits']['total']['value'],
+            'total_count': response['aggregations']['total_count']['total_count']["doc_count"],
+            'pagination': pagination, 'qs': qs, 'qs_exists': qs.exists(),
             'technologies': self.get_aggregation_result(filtered_technologies, unfiltered_technologies, technologies),
             'industries': self.get_aggregation_result(filtered_industries, unfiltered_industries, industries),
             'has_filters': any([bool(search), bool(industries), bool(technologies)]),
         }
+
+    def get_qs_from_search_result(self, search):
+        return super().get_qs_from_search_result(search).prefetch_related('technologies').prefetch_related('industries')
