@@ -19,7 +19,7 @@ class ProjectResource(resources.ModelResource):
         clean_model_instances = True
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        self.user = kwargs.pop('user', None)
         self.cleaned_data = getattr(kwargs.pop('form', None), 'cleaned_data', {})
         super(ProjectResource, self).__init__()
 
@@ -29,7 +29,7 @@ class ProjectResource(resources.ModelResource):
         return super(ProjectResource, self).get_or_init_instance(instance_loader, row)
 
     def get_user_id(self) -> Optional[int]:
-        return getattr(self.cleaned_data.get('user'), 'id', None) or (self.request.user.id if self.request else None)
+        return getattr(self.cleaned_data.get('user'), 'id', None) or (self.user.id if self.user else None)
 
     def import_row(self, *args, **kwargs):
         row_result = super(ProjectResource, self).import_row(*args, **kwargs)

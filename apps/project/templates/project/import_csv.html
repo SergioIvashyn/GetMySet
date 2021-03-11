@@ -1,9 +1,107 @@
 {% extends "base.html" %}
-{% load core_tags i18n %}
-
+{% load core_tags i18n static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css\jquery.ezdz.css'  %}">
+    <link rel="stylesheet" href="{% static 'css\jquery.toast.css'  %}">
+    <style>
+.lds-dual-ring {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+.toast-text{
+    font-size: 20px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 4px solid #cef;
+  border-color: #cef transparent #cef transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+    </style>
+{% endblock %}
 {% block content %}
+    <h1 class="text-center">{% trans 'Upload portfolio' %}</h1>
+    <form method="post"
+          id="id_ajax_upload_form"
+          enctype="multipart/form-data">
+    {% csrf_token %}
+
+        {{ form }}
+
+    <button type="submit" class="btn btn-success mt-4 w-100">{% trans 'Submit' %}</button>
+  </form>
+    <div class="loader">{% trans 'It can take a few minutes. Please do not reload page.' %}<div class="lds-dual-ring"></div></div>
+
 {% endblock %}
 
 {% block extra_js %}
-<h1 class="text-center">{% trans 'Upload CSV' %}</h1>
+    <script src="{% static 'js\jquery.ezdz.js' %}"></script>
+    <script src="{% static 'js\jquery.toast.js' %}"></script>
+
+    <script type="text/javascript">
+    const submitButton = $('[type=submit]');
+    const defaultToastOptions = {
+        heading: '<div class=\'toast-text\'>Error</div>',
+        showHideTransition: 'fade',
+        allowToastClose: true,
+        hideAfter: 4000,
+        stack: 20,
+        position: 'top-right',
+        bgColor: '#ff2e2e',
+        textColor: '#eeeeee',
+        textAlign: 'left',
+        loader: false
+    };
+
+    $('input[type="file"]').ezdz(options={
+        className: 'w-100 mb-4'
+    });
+    // form upload
+    const loader = $('.loader');
+    loader.hide();
+    $('#id_ajax_upload_form').submit(function(e){
+        e.preventDefault();
+        loader.show();
+        submitButton.prop('disabled', true);
+        $form = $(this);
+        let formData = new FormData(this);
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                loader.hide();
+                submitButton.prop('disabled', false);
+                $('.error').remove();
+                console.log(response);
+                if(response.error){
+                    $.each(response.errors, function(name, error){
+                        $.toast({text:`<div class='toast-text'>${error}</div>`, ...defaultToastOptions});
+                    })
+                }
+                else{
+                    window.location = "/projects/public/";
+                }
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    });
+    // end
+   </script>
 {% endblock %}

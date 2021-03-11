@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     # 'django_select2',
     # 'rest_framework',
     # 'rest_framework.authtoken',
-
+    'apps',
     'apps.accounts',
     'apps.company',
     'apps.core',
@@ -130,7 +130,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = config('STATIC_ROOT', default=os.path.join(BASE_DIR, 'staticfiles'))
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, PROJECT_NAME, 'static'),
+    os.path.join('static'),
 )
 
 MEDIA_ROOT = config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
@@ -227,3 +227,9 @@ USER_FIELD_MAPPING = {'email': 'email', 'fullname': 'name'}
 
 ELASTICSEARCH_URL = config('ELASTIC_SEARCH_URL', default='')
 
+# celery
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Kiev'
+CELERY_BEAT_SCHEDULE = {}
