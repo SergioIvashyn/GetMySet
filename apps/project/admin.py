@@ -22,6 +22,8 @@ class ProjectExportForm(ExportForm):
 
 
 class ProjectImportForm(ImportForm):
+    INPUT_FORMATS = ('csv', 'xls',)
+
     user = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
 
     def __init__(self, *args, **kwargs):
@@ -34,8 +36,9 @@ class ProjectImportForm(ImportForm):
 
     def clean(self):
         cleaned_data = super(ProjectImportForm, self).clean()
-        # print(self.cleaned_data['import_file'].name)
-        # print(dir(self.cleaned_data['import_file']))
+        input_format = self.INPUT_FORMATS[int(self.cleaned_data['input_format'])]
+        if input_format != self.cleaned_data['import_file'].name.split('.')[-1]:
+            self.add_error('import_file', f"{_('Current file is not ')}{input_format.upper()}")
         return cleaned_data
 
 
@@ -46,7 +49,7 @@ class ProjectConfirmImportForm(ConfirmImportForm):
 class ProjectAdmin(ImportExportModelAdmin):
     resource_class = ProjectResource
     from_encoding = "utf-8"
-    formats = (CSV, XLS, )
+    formats = (CSV, XLS,)
     import_template_name = 'import_export.html'
     list_display = ('name', 'url', 'is_private', 'user')
     actions = [
