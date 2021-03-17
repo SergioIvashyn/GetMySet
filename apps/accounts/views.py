@@ -1,17 +1,11 @@
 from django.contrib.auth.forms import SetPasswordForm
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.conf import settings
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.utils.translation import ugettext as _
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.urls import reverse, reverse_lazy
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Q
+from django.urls import reverse
 from .models import User
 from .forms import EditUserForm
 from .services.email_sender import UserEmailSender

@@ -3,6 +3,8 @@ from typing import Optional, List
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import QuerySet
+
+from apps.core.models import ImportInfo
 from apps.core.services.elasticsearch_api_base import ElasticSearchModelService, ESPagination
 from apps.core import models
 from django.utils.translation import gettext_lazy as _
@@ -50,6 +52,9 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
         }
 
     def filter_projects_context(self, request: WSGIRequest, is_private: bool):
+        import_infos = list(ImportInfo.objects.filter(user_id=request.user.pk, status__in=[
+            ImportInfo.PENDING, ImportInfo.SUCCESS]))
+        ImportInfo.objects.filter(user_id=request.user.pk, status=ImportInfo.SUCCESS).delete()
         query_params = request.GET
         page = int(query_params.get('page', 1))
         search = query_params.get('search')
@@ -58,7 +63,7 @@ class ProjectElasticSearchModelService(ElasticSearchModelService):
         user = request.user.pk
         result = self.filter_projects(page=page, search=search, is_private=is_private, user=user,
                                       industries=industries, technologies=technologies)
-        return {**result, 'menu': _('Private') if is_private else _('Public')}
+        return {**result, 'menu': _('Private') if is_private else _('Public'), 'import_info_qs': import_infos}
 
     @staticmethod
     def build_unfiltered_aggregation(key: str, filters: list) -> dict:
