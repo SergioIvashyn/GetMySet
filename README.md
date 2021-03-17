@@ -1,6 +1,6 @@
 # My Set
 
-This repository is a trial project for Planeks team.
+This repository is a pet project.
 
 ## Getting started
 
