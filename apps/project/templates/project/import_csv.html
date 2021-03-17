@@ -39,13 +39,10 @@
           id="id_ajax_upload_form"
           enctype="multipart/form-data">
     {% csrf_token %}
-
         {{ form }}
-
     <button type="submit" class="btn btn-success mt-4 w-100">{% trans 'Submit' %}</button>
   </form>
     <div class="loader">{% trans 'It can take a few minutes. Please do not reload page.' %}<div class="lds-dual-ring"></div></div>
-
 {% endblock %}
 
 {% block extra_js %}
